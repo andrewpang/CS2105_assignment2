@@ -42,6 +42,7 @@ class FileReceiver {
             ByteBuffer bWrapper = ByteBuffer.wrap(pkt.getData(), 0, 8);
             long senderChecksum = bWrapper.getLong();
             String fileString = new String(pkt.getData(), 8, 992);
+
             //String filename = new String(pkt.getData(), 8, pkt.getLength()); 
             //System.out.println(filename);
             //crc.update(filename.getBytes());
@@ -51,13 +52,13 @@ class FileReceiver {
             //System.out.println(senderPort);
 
             //String received = new String(pkt.getData(), 0, pkt.getLength());
-            fos = new FileOutputStream(fileString.trim()); 
+            fos = new FileOutputStream(fileString); 
             InetAddress address = InetAddress.getByName("localhost");
             int seq = 1;
 
             while(true){
-                buffer = new byte[1000];
-                pkt = new DatagramPacket(buffer, buffer.length);
+                //buffer = new byte[1000];
+                //pkt = new DatagramPacket(buffer, buffer.length);
                 socket.receive(pkt);
 
                 //received = new String(pkt.getData(), 0, pkt.getLength());
@@ -91,7 +92,7 @@ class FileReceiver {
                 //recPkt = new DatagramPacket(buffer, 9, address, senderPort);
                 //socket.send(recPkt);
                 
-                fos.write(pkt.getData(), 9, 991);
+                //fos.write(pkt.getData(), 9, 991);
                 if(pkt.getLength() != 1000){
                     break;
                 }

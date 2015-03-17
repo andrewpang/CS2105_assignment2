@@ -37,7 +37,7 @@ public class UnreliNET {
                     // read data from the incoming socket
                     sk1.receive(in_pkt);
                     returnPort_sk1 = in_pkt.getPort();
-                    
+                    System.out.println(returnPort_sk1);
                     // check the length of the packet
                     if (in_pkt.getLength() > 1000) {
                         System.err.println("Error: packet length is more than 1000 bytes");
