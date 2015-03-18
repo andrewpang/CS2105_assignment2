@@ -60,7 +60,10 @@ class FileReceiver {
             //String received = new String(pkt.getData(), 0, pkt.getLength());
             fos = new FileOutputStream(trimmedFile); 
             InetAddress address = InetAddress.getByName("localhost");
-            int seq = 1;
+
+
+            byte[] sendback = new byte[9];
+            byte[] ackSeq = new byte[1];
 
             while(true){
                 buffer = new byte[1000];
@@ -80,19 +83,18 @@ class FileReceiver {
 
                 System.out.println(ck1 + " + " + senderChecksum);
 
-                buffer = new byte[9];
-                byte[] ackSeq = new byte[1];
+                ackSeq[0] = (byte)1;
              
-                crc = new CRC32();
-                crc.update(ackSeq);
-                long ackChecksum = crc.getValue();
-                //byte[] ackChecksumArr = ByteBuffer.allocate(8).putLong(checksum).array();
-                //System.arraycopy(ackSeq, 0, buffer, 0, 1);
-                //System.arraycopy(ackChecksumArr, 0, buffer, 1, ackChecksumArr.length);
+                Checksum ackChk = new CRC32();
+                ackChk.update(ackSeq, 0, ackSeq.length);
+                long ackCS = ackChk.getValue();
+                byte[] ackChecksumArr = ByteBuffer.allocate(8).putLong(ackCS).array();
+                System.arraycopy(ackSeq, 0, sendback, 0, 1);
+                System.arraycopy(ackChecksumArr, 0, sendback, 1, ackChecksumArr.length);
 
-                //System.out.println(ac);
-                //recPkt = new DatagramPacket(buffer, 9, address, senderPort);
-                //socket.send(recPkt);
+                System.out.println(sendback[7]);
+                recPkt = new DatagramPacket(sendback, 9, address, senderPort);
+                socket.send(recPkt);
                 
                 fos.write(pkt.getData(), 9, 991);
                 if(pkt.getLength() != 1000){

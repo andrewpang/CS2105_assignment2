@@ -78,6 +78,7 @@ class FileSender {
             while (true){
                 buffer = new byte[1000];
                 data = new byte[992];
+                byte[] recBuffer = new byte[1000];
                 numBytes = bis.read(data, 1, 991);
                 //System.out.println(data.length);
                 if(numBytes <= 0){
@@ -88,20 +89,20 @@ class FileSender {
                 Checksum checksum1 = new CRC32();
                 checksum1.update(data, 0, data.length);
                 long ck = checksum1.getValue();
-                //System.out.println(ck);
-                //
-                //crc.reset();
-                //crc.update(data);
 
-
-                //System.out.println(chkSum + "    " + checksum);
-                //
                 byte[] checksumArr = ByteBuffer.allocate(8).putLong(ck).array();
                 System.arraycopy(checksumArr, 0, buffer, 0, checksumArr.length);
                 System.arraycopy(data, 0, buffer, checksumArr.length, data.length);
                 pkt = new DatagramPacket(buffer, numBytes+9, address, intPort);
                 socket.send(pkt);
 
+
+                recPkt = new DatagramPacket(recBuffer, recBuffer.length);
+                socket.receive(recPkt);
+                byte[] rec = recPkt.getData();
+                byte[] recSeq = new byte[1];
+                System.arraycopy(recSeq, 0, recSeq, 0, 1);
+                System.out.println(rec[7]);
                 // ByteBuffer wrapper = ByteBuffer.wrap(pkt.getData(), 0, 8);
                 // long senderChecksum = wrapper.getLong();
                 // byte[] restWrapper = pkt.getData();
