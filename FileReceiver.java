@@ -25,6 +25,7 @@ class FileReceiver {
     public FileReceiver(String localPort) {
         FileOutputStream fos = null;
         BufferedOutputStream bos = null;
+        CRC32 crc = new CRC32();
       
         int intPort = Integer.parseInt(localPort);
         try{
@@ -42,16 +43,20 @@ class FileReceiver {
             ByteBuffer bWrapper = ByteBuffer.wrap(pkt.getData(), 0, 8);
             long senderChecksum = bWrapper.getLong();
             String fileString = new String(pkt.getData(), 8, 992);
+            String trimmedFile = fileString.trim();
+            System.out.println(senderChecksum);
+
             //String filename = new String(pkt.getData(), 8, pkt.getLength()); 
-            //System.out.println(filename);
-            //crc.update(filename.getBytes());
-            //long chkSum = crc.getValue(); 
+            
+            crc.update(trimmedFile.getBytes());
+            long chkSum = crc.getValue(); 
+            System.out.println(chkSum);
 
             //int senderPort = pkt.getPort();
             //System.out.println(senderPort);
 
             //String received = new String(pkt.getData(), 0, pkt.getLength());
-            fos = new FileOutputStream(fileString.trim()); 
+            fos = new FileOutputStream(trimmedFile); 
             InetAddress address = InetAddress.getByName("localhost");
             int seq = 1;
 
@@ -60,26 +65,18 @@ class FileReceiver {
                 pkt = new DatagramPacket(buffer, buffer.length);
                 socket.receive(pkt);
 
-                //received = new String(pkt.getData(), 0, pkt.getLength());
-                //System.out.println(pktLen);
                 ByteBuffer wrapper = ByteBuffer.wrap(pkt.getData(), 0, 8);
-                senderChecksum = wrapper.getLong();
-
+                long yo = wrapper.getLong();
                 ByteBuffer restWrapper = ByteBuffer.wrap(pkt.getData(), 8, 992);
-                //byte[] comp = new byte[992];
-                //System.arraycopy(comp, 0, restWrapper, 0, restWrapper.length);
-                CRC32 crc = new CRC32();
+
+                
                 crc.update(restWrapper);
                 long checksum = crc.getValue();
 
                 buffer = new byte[9];
                 byte[] ackSeq = new byte[1];
-                // if(checksum == senderChecksum){
-                //     ackSeq[0] = seq;
-                // }
-                // else{
-                //     ackSeq[0] = 1 - seq;
-                // }
+                
+             
                 crc = new CRC32();
                 crc.update(ackSeq);
                 long ackChecksum = crc.getValue();

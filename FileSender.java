@@ -56,7 +56,9 @@ class FileSender {
             CRC32 crc = new CRC32();
             //Send filename
             byte[] filename = rcvFileName.getBytes();
+            crc.update(filename);
             long checksum = crc.getValue();
+            System.out.println(checksum);
             byte[] checksumByte = ByteBuffer.allocate(8).putLong(checksum).array();
             int totalSize = filename.length + checksumByte.length;
             //buffer = new byte[1000];
