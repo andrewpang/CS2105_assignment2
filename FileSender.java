@@ -51,6 +51,10 @@ class FileSender {
             // Create packet
             byte[] buffer = new byte[1000];
             byte[] data = new byte[1000];
+            byte[] seqArr = new byte[1];
+            byte seq = 1;
+            seqArr[0] = seq;
+
             InetAddress address = InetAddress.getByName("localhost");
             int numBytes;
             CRC32 crc = new CRC32();
@@ -58,19 +62,20 @@ class FileSender {
             byte[] filename = rcvFileName.getBytes();
             crc.update(filename);
             long checksum = crc.getValue();
-            System.out.println(checksum);
             byte[] checksumByte = ByteBuffer.allocate(8).putLong(checksum).array();
             int totalSize = filename.length + checksumByte.length;
-            //buffer = new byte[1000];
+
             System.arraycopy(checksumByte, 0, buffer, 0, checksumByte.length);
+            //System.arraycopy(seqArr, 0, buffer, checksumByte.length, 1);
             System.arraycopy(filename, 0, buffer, checksumByte.length, filename.length);
+           
             pkt = new DatagramPacket(buffer, totalSize, address, intPort);
+
             socket.send(pkt);
 
             while (true){
                 buffer = new byte[1000];
                 data = new byte[992];
-                byte seq = 1;
                 numBytes = bis.read(data, 1, 991);
                 if(numBytes <= 0){
                         break;

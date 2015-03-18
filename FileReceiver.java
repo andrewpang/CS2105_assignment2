@@ -40,20 +40,23 @@ class FileReceiver {
             byte[] buffer = new byte[1000];
             pkt = new DatagramPacket(buffer, buffer.length);
             socket.receive(pkt);
+
             ByteBuffer bWrapper = ByteBuffer.wrap(pkt.getData(), 0, 8);
             long senderChecksum = bWrapper.getLong();
+            ByteBuffer seqWrapper = ByteBuffer.wrap(pkt.getData(), 8, 1); 
+            byte sendSeq = seqWrapper.get();
             String fileString = new String(pkt.getData(), 8, 992);
             String trimmedFile = fileString.trim();
-            System.out.println(senderChecksum);
-
-            //String filename = new String(pkt.getData(), 8, pkt.getLength()); 
-            
+            System.out.println(fileString);
             crc.update(trimmedFile.getBytes());
             long chkSum = crc.getValue(); 
             System.out.println(chkSum);
+            System.out.println(senderChecksum);
+            if(chkSum == senderChecksum){
 
-            //int senderPort = pkt.getPort();
-            //System.out.println(senderPort);
+            }
+            int senderPort = pkt.getPort();
+            System.out.println(senderPort);
 
             //String received = new String(pkt.getData(), 0, pkt.getLength());
             fos = new FileOutputStream(trimmedFile); 
