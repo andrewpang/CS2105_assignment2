@@ -54,7 +54,7 @@ class FileSender {
             byte[] buffer = new byte[1000];
             byte[] data = new byte[1000];
             byte[] seqArr = new byte[1];
-            byte seq = 1;
+            byte seq = (byte)1;
             seqArr[0] = seq;
 
             InetAddress address = InetAddress.getByName("localhost");
@@ -103,27 +103,9 @@ class FileSender {
                 byte[] recSeq = new byte[1];
                 System.arraycopy(recSeq, 0, recSeq, 0, 1);
                 System.out.println(rec[7]);
-                // ByteBuffer wrapper = ByteBuffer.wrap(pkt.getData(), 0, 8);
-                // long senderChecksum = wrapper.getLong();
-                // byte[] restWrapper = pkt.getData();
-                // byte[] rest = new byte[992];
-                // System.arraycopy(restWrapper, 8, rest, 0, 992);
 
-                // Checksum chkSum = new CRC32();
-                // chkSum.update(rest, 0, rest.length);
-                // long ck1 = chkSum.getValue();
-                // System.out.println(ck1);
-                //boolean areEqual = Arrays.equals(data, rest);
-                //System.out.println(areEqual);
-                //System.out.println(data.length + " and " + rest.length);
-                
-                //+ " + " + senderChecksum);
-                //socket.receive(recPkt);
-                //ByteBuffer wrapper = ByteBuffer.wrap(recPkt.getData(), 0, 1);
-                //byte recSeq = wrapper.get();
-                //System.out.println(wrapper);
 
-                //seq = 1 - seq;
+                seq = (byte)(1 - seq);
             }
             //while (true) {
               //  numBytes = bis.read(buffer, 9, 991);

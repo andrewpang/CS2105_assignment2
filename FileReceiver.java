@@ -64,7 +64,7 @@ class FileReceiver {
 
             byte[] sendback = new byte[9];
             byte[] ackSeq = new byte[1];
-
+            byte recSeq = (byte)1;
             while(true){
                 buffer = new byte[1000];
                 pkt = new DatagramPacket(buffer, buffer.length);
@@ -76,14 +76,18 @@ class FileReceiver {
                 byte[] restWrapper = pkt.getData();
                 byte[] rest = new byte[992];
                 System.arraycopy(restWrapper, 8, rest, 0, 992);
+                byte senderSeq = rest[0];
 
                 Checksum chkSum1 = new CRC32();
                 chkSum1.update(rest, 0, rest.length);
                 long ck1 = chkSum1.getValue();
 
-                System.out.println(ck1 + " + " + senderChecksum);
-
-                ackSeq[0] = (byte)1;
+                //System.out.println(ck1 + " + " + senderChecksum);
+                if(senderSeq == recSeq){
+                    ackSeq[0] = (byte)1;
+                } else{
+                    ackSeq[0] = (byte)0;
+                }
              
                 Checksum ackChk = new CRC32();
                 ackChk.update(ackSeq, 0, ackSeq.length);
@@ -92,7 +96,7 @@ class FileReceiver {
                 System.arraycopy(ackSeq, 0, sendback, 0, 1);
                 System.arraycopy(ackChecksumArr, 0, sendback, 1, ackChecksumArr.length);
 
-                System.out.println(sendback[7]);
+                //System.out.println(sendback[7]);
                 recPkt = new DatagramPacket(sendback, 9, address, senderPort);
                 socket.send(recPkt);
                 
@@ -100,7 +104,7 @@ class FileReceiver {
                 if(pkt.getLength() != 1000){
                     break;
                 }
-
+                recSeq = (byte)(1-recSeq);
         }
 
 
