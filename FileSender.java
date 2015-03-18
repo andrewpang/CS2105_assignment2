@@ -4,6 +4,8 @@ import java.net.*;
 import java.io.*;
 import java.util.zip.*;
 import java.nio.*;
+import java.util.Arrays;
+import java.util.zip.Checksum;
 
 
 class FileSender {
@@ -77,18 +79,44 @@ class FileSender {
                 buffer = new byte[1000];
                 data = new byte[992];
                 numBytes = bis.read(data, 1, 991);
+                //System.out.println(data.length);
                 if(numBytes <= 0){
                         break;
                 }
                 data[0] = seq;
                 crc.update(data);
-                checksum = crc.getValue();
-                byte[] checksumArr = ByteBuffer.allocate(8).putLong(checksum).array();
+                Checksum checksum1 = new CRC32();
+                checksum1.update(data, 0, data.length);
+                long ck = checksum1.getValue();
+                //System.out.println(ck);
+                //
+                //crc.reset();
+                //crc.update(data);
+
+
+                //System.out.println(chkSum + "    " + checksum);
+                //
+                byte[] checksumArr = ByteBuffer.allocate(8).putLong(ck).array();
                 System.arraycopy(checksumArr, 0, buffer, 0, checksumArr.length);
                 System.arraycopy(data, 0, buffer, checksumArr.length, data.length);
                 pkt = new DatagramPacket(buffer, numBytes+9, address, intPort);
                 socket.send(pkt);
 
+                // ByteBuffer wrapper = ByteBuffer.wrap(pkt.getData(), 0, 8);
+                // long senderChecksum = wrapper.getLong();
+                // byte[] restWrapper = pkt.getData();
+                // byte[] rest = new byte[992];
+                // System.arraycopy(restWrapper, 8, rest, 0, 992);
+
+                // Checksum chkSum = new CRC32();
+                // chkSum.update(rest, 0, rest.length);
+                // long ck1 = chkSum.getValue();
+                // System.out.println(ck1);
+                //boolean areEqual = Arrays.equals(data, rest);
+                //System.out.println(areEqual);
+                //System.out.println(data.length + " and " + rest.length);
+                
+                //+ " + " + senderChecksum);
                 //socket.receive(recPkt);
                 //ByteBuffer wrapper = ByteBuffer.wrap(recPkt.getData(), 0, 1);
                 //byte recSeq = wrapper.get();

@@ -42,21 +42,20 @@ class FileReceiver {
             socket.receive(pkt);
 
             ByteBuffer bWrapper = ByteBuffer.wrap(pkt.getData(), 0, 8);
-            long senderChecksum = bWrapper.getLong();
-            ByteBuffer seqWrapper = ByteBuffer.wrap(pkt.getData(), 8, 1); 
-            byte sendSeq = seqWrapper.get();
+            long senderChecksum1 = bWrapper.getLong();
+            //ByteBuffer seqWrapper = ByteBuffer.wrap(pkt.getData(), 8, 1); 
+            //byte sendSeq = seqWrapper.get();
             String fileString = new String(pkt.getData(), 8, 992);
             String trimmedFile = fileString.trim();
             System.out.println(fileString);
             crc.update(trimmedFile.getBytes());
             long chkSum = crc.getValue(); 
-            System.out.println(chkSum);
-            System.out.println(senderChecksum);
-            if(chkSum == senderChecksum){
+
+            if(chkSum == senderChecksum1){
 
             }
             int senderPort = pkt.getPort();
-            System.out.println(senderPort);
+            //System.out.println(senderPort);
 
             //String received = new String(pkt.getData(), 0, pkt.getLength());
             fos = new FileOutputStream(trimmedFile); 
@@ -68,26 +67,30 @@ class FileReceiver {
                 pkt = new DatagramPacket(buffer, buffer.length);
                 socket.receive(pkt);
 
-                ByteBuffer wrapper = ByteBuffer.wrap(pkt.getData(), 0, 8);
-                long yo = wrapper.getLong();
-                ByteBuffer restWrapper = ByteBuffer.wrap(pkt.getData(), 8, 992);
 
-                
-                crc.update(restWrapper);
-                long checksum = crc.getValue();
+                ByteBuffer wrapper = ByteBuffer.wrap(pkt.getData(), 0, 8);
+                long senderChecksum = wrapper.getLong();
+                byte[] restWrapper = pkt.getData();
+                byte[] rest = new byte[992];
+                System.arraycopy(restWrapper, 8, rest, 0, 992);
+
+                Checksum chkSum1 = new CRC32();
+                chkSum1.update(rest, 0, rest.length);
+                long ck1 = chkSum1.getValue();
+
+                System.out.println(ck1 + " + " + senderChecksum);
 
                 buffer = new byte[9];
                 byte[] ackSeq = new byte[1];
-                
              
                 crc = new CRC32();
                 crc.update(ackSeq);
                 long ackChecksum = crc.getValue();
-                byte[] ackChecksumArr = ByteBuffer.allocate(8).putLong(checksum).array();
-                System.arraycopy(ackSeq, 0, buffer, 0, 1);
-                System.arraycopy(ackChecksumArr, 0, buffer, 1, ackChecksumArr.length);
+                //byte[] ackChecksumArr = ByteBuffer.allocate(8).putLong(checksum).array();
+                //System.arraycopy(ackSeq, 0, buffer, 0, 1);
+                //System.arraycopy(ackChecksumArr, 0, buffer, 1, ackChecksumArr.length);
 
-                //System.out.println(senderPort);
+                //System.out.println(ac);
                 //recPkt = new DatagramPacket(buffer, 9, address, senderPort);
                 //socket.send(recPkt);
                 
