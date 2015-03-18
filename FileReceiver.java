@@ -47,7 +47,7 @@ class FileReceiver {
             //byte sendSeq = seqWrapper.get();
             String fileString = new String(pkt.getData(), 8, 992);
             String trimmedFile = fileString.trim();
-            System.out.println(fileString);
+            //System.out.println(fileString);
             crc.update(trimmedFile.getBytes());
             long chkSum = crc.getValue(); 
 
@@ -85,6 +85,7 @@ class FileReceiver {
                 //System.out.println(ck1 + " + " + senderChecksum);
                 if(senderSeq == recSeq){
                     ackSeq[0] = (byte)1;
+                    recSeq = (byte)(1-recSeq);
                 } else{
                     ackSeq[0] = (byte)0;
                 }
@@ -104,7 +105,6 @@ class FileReceiver {
                 if(pkt.getLength() != 1000){
                     break;
                 }
-                recSeq = (byte)(1-recSeq);
         }
 
 

@@ -2,6 +2,7 @@
 
 import java.net.*;
 import java.io.*;
+import java.util.*;
 import java.util.zip.*;
 import java.nio.*;
 import java.util.Arrays;
@@ -75,7 +76,12 @@ class FileSender {
 
             socket.send(pkt);
 
+           
+
             while (true){
+                Timer timer = new Timer();
+                //timer.schedule(new TimerTask(){ }, 10);
+
                 buffer = new byte[1000];
                 data = new byte[992];
                 byte[] recBuffer = new byte[1000];
@@ -97,15 +103,25 @@ class FileSender {
                 socket.send(pkt);
 
 
+
+
                 recPkt = new DatagramPacket(recBuffer, recBuffer.length);
                 socket.receive(recPkt);
                 byte[] rec = recPkt.getData();
-                byte[] recSeq = new byte[1];
-                System.arraycopy(recSeq, 0, recSeq, 0, 1);
-                System.out.println(rec[7]);
+                //byte[] recSeq = new byte[1];
+                //System.arraycopy(recSeq, 0, rec, 0, 1);
+                byte recSeq = rec[0];
+                System.out.println(recSeq);
+                Thread.sleep(10);
+                if(recSeq == seq){
+                    seq = (byte)(1 - seq);
+                    //cancel timer
+                } else{
+                    socket.send(pkt);
+                }
 
 
-                seq = (byte)(1 - seq);
+                
             }
             //while (true) {
               //  numBytes = bis.read(buffer, 9, 991);
