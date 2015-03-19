@@ -8,8 +8,22 @@ import java.nio.*;
 import java.util.Arrays;
 import java.util.zip.Checksum;
 
-
-class FileSender extends TimerTask{
+class sender extends TimerTask{
+    DatagramSocket socket;
+    DatagramPacket packet;
+    public sender(DatagramSocket skt, DatagramPacket pkt){
+        socket = skt;
+        packet = pkt;
+    }
+    public void run(){
+        try{
+            socket.send(packet);
+        } catch(IOException e) {
+            System.out.println("Error:" + e);
+        }
+    }
+}
+class FileSender{
     
     public DatagramSocket socket; 
     public DatagramPacket pkt;
@@ -24,10 +38,6 @@ class FileSender extends TimerTask{
         }
         
         new FileSender(args[0], args[1], args[2]);
-    }
-
-    public void run(){
-        System.out.println("Hello World!"); 
     }
     
     public FileSender(String fileToOpen, String port, String rcvFileName)  throws InterruptedException{
@@ -48,7 +58,7 @@ class FileSender extends TimerTask{
                 //socket.setBroadcast(true);
                 //socket.bind(new InetSocketAddress(intPort));
             } 
-
+            socket.setSoTimeout(1000);
             // // Checksum
             // byte[] bytes = Files.readAllBytes(Paths.get(fileToOpen)); 
             // CRC32 crc = new CRC32();
@@ -114,33 +124,42 @@ class FileSender extends TimerTask{
                 System.arraycopy(checksumArr, 0, buffer, 0, checksumArr.length);
                 System.arraycopy(data, 0, buffer, checksumArr.length, data.length);
                 pkt = new DatagramPacket(buffer, data.length+8, address, intPort);
-                socket.send(pkt);
+                
+                while(true){
+                    try{
+                        socket.send(pkt);
+                        recPkt = new DatagramPacket(recBuffer, recBuffer.length);
+                        socket.receive(recPkt);
 
-                Timer timer = new Timer();
-                //timer.schedule(new sender(), 0, 1000);
-                //pass in pkt to timertask
-                recPkt = new DatagramPacket(recBuffer, recBuffer.length);
-                socket.receive(recPkt);
-                byte[] rec = recPkt.getData();
+                        byte[] rec = recPkt.getData();
 
-                ByteBuffer recWrapper = ByteBuffer.wrap(recPkt.getData(), 1, 8);
-                long recChecksum = recWrapper.getLong();
-                byte[] recSeq = new byte[1];
-                System.arraycopy(rec, 0, recSeq, 0, 1);
+                        ByteBuffer recWrapper = ByteBuffer.wrap(recPkt.getData(), 1, 8);
+                        long recChecksum = recWrapper.getLong();
+                        byte[] recSeq = new byte[1];
+                        System.arraycopy(rec, 0, recSeq, 0, 1);
 
-                Checksum ackCheck = new CRC32();
-                ackCheck.update(recSeq, 0, recSeq.length);
-                long ackCheckVal = ackCheck.getValue();
+                        Checksum ackCheck = new CRC32();
+                        ackCheck.update(recSeq, 0, recSeq.length);
+                        long ackCheckVal = ackCheck.getValue();
 
-                    //System.out.println(seq);
-                if(recSeq[0] == seq && (recChecksum == ackCheckVal)){
-                    seq = (byte)(1 - seq);
-                    timer.cancel();
-                } else{
+                            //System.out.println(seq);
+                        if((recSeq[0] == seq) && (recChecksum == ackCheckVal)){
+                            seq = (byte)(1 - seq);
+                            break;
+                            //timer.cancel();
+                        } 
+                    } catch (SocketTimeoutException s) {
+                        socket.send(pkt);
+                        continue;
+                    }
+                }
+
+                
+                //else{
                     //keep sending packet
-                    socket.send(pkt);
+                    //socket.send(pkt);
                     //break;
-                }               
+                //}               
             }
             //while (true) {
               //  numBytes = bis.read(buffer, 9, 991);

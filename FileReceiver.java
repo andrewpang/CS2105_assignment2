@@ -37,6 +37,7 @@ class FileReceiver {
                 socket.setBroadcast(true);
                 socket.bind(new InetSocketAddress(intPort));
             } 
+
             byte[] buffer = new byte[1000];
             pkt = new DatagramPacket(buffer, buffer.length);
             socket.receive(pkt);
@@ -95,7 +96,8 @@ class FileReceiver {
                     fos.write(pktArr, 9, pkt.getLength()-9);
                     //cut off extra
                 } else{
-                    ackSeq[0] = (byte)0;
+                    ackSeq[0] = (byte)(1-recSeq);
+                    
                 }
                 System.out.println(recSeq);
 
