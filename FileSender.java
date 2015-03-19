@@ -115,6 +115,7 @@ class FileSender {
                 ackCheck.update(recSeq, 0, recSeq.length);
                 long ackCheckVal = ackCheck.getValue();
 
+                System.out.println(seq);
                 if(recSeq[0] == seq && (recChecksum == ackCheckVal)){
                     seq = (byte)(1 - seq);
                     //cancel timer
@@ -123,7 +124,7 @@ class FileSender {
                     //socket.send(pkt);
                     //break;
                 }
-                //System.out.println(rec[0]);
+                
 
                 
             }

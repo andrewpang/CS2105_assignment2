@@ -84,13 +84,14 @@ class FileReceiver {
 
                 //System.out.println(ck1 + " + " + senderChecksum);
                 if(senderSeq == recSeq){
-                    ackSeq[0] = (byte)1;
+                    ackSeq[0] = recSeq;
                     recSeq = (byte)(1-recSeq);
                     fos.write(pkt.getData(), 9, 991);
                 } else{
                     ackSeq[0] = (byte)0;
                 }
-             
+                System.out.println(recSeq);
+
                 Checksum ackChk = new CRC32();
                 ackChk.update(ackSeq, 0, ackSeq.length);
                 long ackCS = ackChk.getValue();
