@@ -102,18 +102,20 @@ class FileSender {
                 pkt = new DatagramPacket(buffer, numBytes+9, address, intPort);
                 socket.send(pkt);
 
-
-
-
                 recPkt = new DatagramPacket(recBuffer, recBuffer.length);
                 socket.receive(recPkt);
                 byte[] rec = recPkt.getData();
-                //byte[] recSeq = new byte[1];
-                //System.arraycopy(recSeq, 0, rec, 0, 1);
-                byte recSeq = rec[0];
-                System.out.println(recSeq);
-                Thread.sleep(10);
-                if(recSeq == seq){
+
+                ByteBuffer recWrapper = ByteBuffer.wrap(recPkt.getData(), 1, 8);
+                long recChecksum = recWrapper.getLong();
+                byte[] recSeq = new byte[1];
+                System.arraycopy(rec, 0, recSeq, 0, 1);
+
+                Checksum ackCheck = new CRC32();
+                ackCheck.update(recSeq, 0, recSeq.length);
+                long ackCheckVal = ackCheck.getValue();
+
+                if(recSeq[0] == seq && recChecksum == ackCheckVal){
                     seq = (byte)(1 - seq);
                     //cancel timer
                 } else{

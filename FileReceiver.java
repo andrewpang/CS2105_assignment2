@@ -86,6 +86,7 @@ class FileReceiver {
                 if(senderSeq == recSeq){
                     ackSeq[0] = (byte)1;
                     recSeq = (byte)(1-recSeq);
+                    fos.write(pkt.getData(), 9, 991);
                 } else{
                     ackSeq[0] = (byte)0;
                 }
@@ -93,15 +94,15 @@ class FileReceiver {
                 Checksum ackChk = new CRC32();
                 ackChk.update(ackSeq, 0, ackSeq.length);
                 long ackCS = ackChk.getValue();
+                ackChk.reset();
                 byte[] ackChecksumArr = ByteBuffer.allocate(8).putLong(ackCS).array();
                 System.arraycopy(ackSeq, 0, sendback, 0, 1);
-                System.arraycopy(ackChecksumArr, 0, sendback, 1, ackChecksumArr.length);
+                System.arraycopy(ackChecksumArr, 0, sendback, 1, 8);
 
-                //System.out.println(sendback[7]);
                 recPkt = new DatagramPacket(sendback, 9, address, senderPort);
+
                 socket.send(recPkt);
                 
-                fos.write(pkt.getData(), 9, 991);
                 if(pkt.getLength() != 1000){
                     break;
                 }
