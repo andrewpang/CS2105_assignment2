@@ -100,7 +100,6 @@ class FileReceiver {
                 System.arraycopy(ackChecksumArr, 0, sendback, 1, 8);
 
                 recPkt = new DatagramPacket(sendback, 9, address, senderPort);
-
                 socket.send(recPkt);
                 
                 if(pkt.getLength() != 1000){

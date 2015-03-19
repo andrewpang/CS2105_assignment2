@@ -79,7 +79,7 @@ class FileSender {
            
 
             while (true){
-                Timer timer = new Timer();
+                //Timer timer = new Timer();
                 //timer.schedule(new TimerTask(){ }, 10);
 
                 buffer = new byte[1000];
@@ -115,13 +115,15 @@ class FileSender {
                 ackCheck.update(recSeq, 0, recSeq.length);
                 long ackCheckVal = ackCheck.getValue();
 
-                if(recSeq[0] == seq && recChecksum == ackCheckVal){
+                if(recSeq[0] == seq && (recChecksum == ackCheckVal)){
                     seq = (byte)(1 - seq);
                     //cancel timer
                 } else{
-                    socket.send(pkt);
+                    //keep sending packet
+                    //socket.send(pkt);
+                    //break;
                 }
-
+                //System.out.println(rec[0]);
 
                 
             }
