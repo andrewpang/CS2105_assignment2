@@ -9,7 +9,7 @@ import java.util.Arrays;
 import java.util.zip.Checksum;
 
 
-class FileSender {
+class FileSender extends TimerTask{
     
     public DatagramSocket socket; 
     public DatagramPacket pkt;
@@ -24,6 +24,10 @@ class FileSender {
         }
         
         new FileSender(args[0], args[1], args[2]);
+    }
+
+    public void run(){
+        System.out.println("Hello World!"); 
     }
     
     public FileSender(String fileToOpen, String port, String rcvFileName)  throws InterruptedException{
@@ -79,29 +83,42 @@ class FileSender {
            
 
             while (true){
-                //Timer timer = new Timer();
-                //timer.schedule(new TimerTask(){ }, 10);
+                
 
-                buffer = new byte[1000];
+            
                 data = new byte[992];
                 byte[] recBuffer = new byte[1000];
                 numBytes = bis.read(data, 1, 991);
-                //System.out.println(data.length);
+                //System.out.println(numBytes);
+                if(numBytes < 991 && numBytes > 0){
+                    byte[] lastData = new byte[numBytes+4];
+                    System.arraycopy(data, 1, lastData, 0, numBytes);
+                    data = new byte[numBytes+1];
+                    System.arraycopy(lastData, 0, data, 1, numBytes);
+ 
+                }
                 if(numBytes <= 0){
                         break;
                 }
+
                 data[0] = seq;
                 crc.update(data);
                 Checksum checksum1 = new CRC32();
                 checksum1.update(data, 0, data.length);
                 long ck = checksum1.getValue();
 
+                buffer = new byte[data.length+8];
+                
+                    // System.out.println(buffer.length);
                 byte[] checksumArr = ByteBuffer.allocate(8).putLong(ck).array();
                 System.arraycopy(checksumArr, 0, buffer, 0, checksumArr.length);
                 System.arraycopy(data, 0, buffer, checksumArr.length, data.length);
-                pkt = new DatagramPacket(buffer, numBytes+9, address, intPort);
+                pkt = new DatagramPacket(buffer, data.length+8, address, intPort);
                 socket.send(pkt);
 
+                Timer timer = new Timer();
+                //timer.schedule(new sender(), 0, 1000);
+                //pass in pkt to timertask
                 recPkt = new DatagramPacket(recBuffer, recBuffer.length);
                 socket.receive(recPkt);
                 byte[] rec = recPkt.getData();
@@ -115,18 +132,15 @@ class FileSender {
                 ackCheck.update(recSeq, 0, recSeq.length);
                 long ackCheckVal = ackCheck.getValue();
 
-                System.out.println(seq);
+                    //System.out.println(seq);
                 if(recSeq[0] == seq && (recChecksum == ackCheckVal)){
                     seq = (byte)(1 - seq);
-                    //cancel timer
+                    timer.cancel();
                 } else{
                     //keep sending packet
-                    //socket.send(pkt);
+                    socket.send(pkt);
                     //break;
-                }
-                
-
-                
+                }               
             }
             //while (true) {
               //  numBytes = bis.read(buffer, 9, 991);

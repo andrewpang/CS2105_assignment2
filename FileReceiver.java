@@ -74,6 +74,11 @@ class FileReceiver {
                 ByteBuffer wrapper = ByteBuffer.wrap(pkt.getData(), 0, 8);
                 long senderChecksum = wrapper.getLong();
                 byte[] restWrapper = pkt.getData();
+                
+                ByteBuffer wrapper2 = ByteBuffer.wrap(pkt.getData(), 8, 4);
+                int size = wrapper2.getInt();
+                
+
                 byte[] rest = new byte[992];
                 System.arraycopy(restWrapper, 8, rest, 0, 992);
                 byte senderSeq = rest[0];
@@ -86,7 +91,9 @@ class FileReceiver {
                 if(senderSeq == recSeq){
                     ackSeq[0] = recSeq;
                     recSeq = (byte)(1-recSeq);
-                    fos.write(pkt.getData(), 9, 991);
+                    byte[] pktArr =  pkt.getData();
+                    fos.write(pktArr, 9, pkt.getLength()-9);
+                    //cut off extra
                 } else{
                     ackSeq[0] = (byte)0;
                 }
