@@ -80,8 +80,8 @@ class FileReceiver {
                 int size = wrapper2.getInt();
                 
 
-                byte[] rest = new byte[992];
-                System.arraycopy(restWrapper, 8, rest, 0, 992);
+                byte[] rest = new byte[pkt.getLength()-8];
+                System.arraycopy(restWrapper, 8, rest, 0, pkt.getLength()-8);
                 byte senderSeq = rest[0];
 
                 Checksum chkSum1 = new CRC32();
@@ -99,7 +99,7 @@ class FileReceiver {
                     ackSeq[0] = (byte)(1-recSeq);
 
                 }
-                System.out.println(recSeq);
+                System.out.println(ackSeq[0]);
 
                 Checksum ackChk = new CRC32();
                 ackChk.update(ackSeq, 0, ackSeq.length);

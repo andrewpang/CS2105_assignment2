@@ -94,8 +94,6 @@ class FileSender{
 
             while (true){
                 
-
-            
                 data = new byte[992];
                 byte[] recBuffer = new byte[1000];
                 numBytes = bis.read(data, 1, 991);
@@ -149,6 +147,7 @@ class FileSender{
                             //timer.cancel();
                         } 
                     } catch (SocketTimeoutException s) {
+                        //System.out.println("this shit corrupted");
                         socket.send(pkt);
                         continue;
                     }
