@@ -89,7 +89,7 @@ class FileReceiver {
                 long ck1 = chkSum1.getValue();
 
                 //System.out.println(ck1 + " + " + senderChecksum);
-                if(senderSeq == recSeq){
+                if(senderSeq == recSeq && senderChecksum == ck1){
                     ackSeq[0] = recSeq;
                     recSeq = (byte)(1-recSeq);
                     byte[] pktArr =  pkt.getData();
@@ -97,7 +97,7 @@ class FileReceiver {
                     //cut off extra
                 } else{
                     ackSeq[0] = (byte)(1-recSeq);
-                    
+
                 }
                 System.out.println(recSeq);
 
