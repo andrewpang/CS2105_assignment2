@@ -58,7 +58,7 @@ class FileSender{
                 //socket.setBroadcast(true);
                 //socket.bind(new InetSocketAddress(intPort));
             } 
-            socket.setSoTimeout(1000);
+            socket.setSoTimeout(300);
             // // Checksum
             // byte[] bytes = Files.readAllBytes(Paths.get(fileToOpen)); 
             // CRC32 crc = new CRC32();
